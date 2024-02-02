@@ -26,15 +26,17 @@ class Server1 {
 			BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
 			String clientRequest = inFromClient.readLine();
 			// System.out.println("Demand Received from Client: " + y);
-			System.out.println("Demand Received from Client:");
+			System.out.print("Demand Received from Client: ");
 
 			int demand = Integer.parseInt(clientRequest);
 			System.out.println("Demand No is : " + demand);
-
 			// Initialization
 			Process p1 = null;
 			Process p2 = null;
 
+			// if (demand==-1) {
+			// 	welcomeSocket.close();
+			// }
 			switch (demand) {
 				case 1:
 					p1 = Runtime.getRuntime().exec("javac ContentsOfFolder.java");
@@ -52,35 +54,38 @@ class Server1 {
 					break;
 
 				case 4:
-					p1 = Runtime.getRuntime().exec("javac DisplayFileSize.java");
-					p2 = Runtime.getRuntime().exec("java DisplayFileSize");
+					p1 = Runtime.getRuntime().exec("javac DisplayVideoSize.java");
+					p2 = Runtime.getRuntime().exec("java DisplayVideoSize");
 					break;
 
 				case 5:
-					p1 = Runtime.getRuntime().exec("javac DisplayFileSize.java");
-					p2 = Runtime.getRuntime().exec("java DisplayFileSize");
+					p2 = Runtime.getRuntime().exec("systeminfo");
 					break;
 
 				default:
-					System.out.println("Invalid Choice! Should be between 1 to 6");
-			}
-
-			String response = "";
-
-			BufferedReader stdInput = new BufferedReader(new InputStreamReader(p2.getInputStream()));
-			while (true) {
-				String fileOutput = stdInput.readLine();
-				if (fileOutput==null) {
+					System.out.println("Invalid Choice! Should be between 1 to 5");
 					break;
+			}
+			
+			String response = "Invalid Choice! Should be between 1 to 5<end>";
+			if (demand>=1 && demand <=5) {
+				response = "";
+				BufferedReader stdInput = new BufferedReader(new InputStreamReader(p2.getInputStream()));
+				while (true) {
+					String fileOutput = stdInput.readLine();
+					if (fileOutput==null) {
+						break;
+					}
+					response = response + fileOutput + "\n" ;
 				}
-				response = response + fileOutput + "\n";
+				response += "<end>";
 			}
 			System.out.println("My response: " + response);
 			DataOutputStream DataToClient = new DataOutputStream(connectionSocket.getOutputStream());
 			// send response to the client
 			DataToClient.writeBytes(response + '\n');
-
 		}
-
+		// welcomeSocket.close();
+		// System.out.println("Closing server");
 	}
 }

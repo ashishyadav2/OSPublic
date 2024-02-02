@@ -2,7 +2,7 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.lang.*;
 
-public class DisplayFileSize {
+public class DisplayVideoSize {
    public static long getFileSize(String filename) {
       File file = new File(filename);
       if (!file.exists() || !file.isFile()) {
@@ -15,6 +15,6 @@ public class DisplayFileSize {
      {
       String file = "Server1.java";
       long size = getFileSize(Paths.get(System.getProperty("user.dir"),file).toString());      
-      System.out.println("File size in Kilo Bytes: " + size/(1024) +"KB");
+      System.out.println("Video size in Kilo Bytes: " + size/(1024) +"KB");
      }
 }
