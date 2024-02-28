@@ -2,14 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.lang.*;
 
-/*
-  ____                           
- / ___|  ___ _ ____   _____ _ __ 
- \___ \ / _ \ '__\ \ / / _ \ '__|
-  ___) |  __/ |   \ V /  __/ |   
- |____/ \___|_|    \_/ \___|_|   
-                                 
- */
+
 class Server1 {
 	@SuppressWarnings("deprecation")
 	public static void main(String argv[]) throws Exception {
@@ -57,9 +50,10 @@ class Server1 {
 					p1 = Runtime.getRuntime().exec("javac DisplayVideoSize.java");
 					p2 = Runtime.getRuntime().exec("java DisplayVideoSize");
 					break;
-
+					
 				case 5:
-					p2 = Runtime.getRuntime().exec("systeminfo");
+					p1 = Runtime.getRuntime().exec("javac ReadTextFile.java");
+					p2 = Runtime.getRuntime().exec("java ReadTextFile");
 					break;
 
 				default:
@@ -67,7 +61,7 @@ class Server1 {
 					break;
 			}
 			
-			String response = "Invalid Choice! Should be between 1 to 5<end>";
+			String response = "Invalid Choice! Should be between 1 to 5";
 			if (demand>=1 && demand <=5) {
 				response = "";
 				BufferedReader stdInput = new BufferedReader(new InputStreamReader(p2.getInputStream()));

@@ -1,14 +1,6 @@
 import java.io.*;
 import java.net.*;
 
-/*
-   ____ _ _            _   
-  / ___| (_) ___ _ __ | |_ 
- | |   | | |/ _ \ '_ \| __|
- | |___| | |  __/ | | | |_ 
-  \____|_|_|\___|_| |_|\__|
-                           
- */
 class Server2 {
   @SuppressWarnings("deprecation")
   public static void main(String argv[]) throws Exception {
@@ -20,9 +12,7 @@ class Server2 {
     }
 
     String serverIPAddress = argv[0];
-    // converting string to integer
     int port = Integer.parseInt(argv[1]);
-    // Run indefinitely until interrupted
     while (true) {
       System.out.println("----------------Menu---------------");
       System.out.println("Enter Choice");
@@ -30,13 +20,9 @@ class Server2 {
       System.out.println("2. To show file size");
       System.out.println("3. To show empty space in drive.");
       System.out.println("4. To show video file size.");
-      System.out.println("5. Get server system info");
+      System.out.println("5. Read txt file");
       System.out.println("-1. Exit");
       System.out.print("Choice: ");
-
-      // System.in - take inputs from the terminal
-      // InputStreamReader() - is a bridge from byte streams to character streams
-      // BufferedReader() - is a class that reads text from a character-input stream
       InputStreamReader inStream = new InputStreamReader(System.in);
       BufferedReader bufferReader = new BufferedReader(inStream);
 
@@ -47,15 +33,15 @@ class Server2 {
         System.out.println("Disconnected from the server");
         System.exit(0);
       }
-      // servers's ip address: (string) and port number (integer)
-      // Socket clientSocket = new Socket("186.168.1.163", 9999);
+      int choiceInt = Integer.parseInt(choice);
+      if (choiceInt>5 || choiceInt<1 ){
+        System.out.println("Invalid Choice! Should be between 1 to 5!");
+        System.out.println("");
+        continue;
+      }
       try {
         Socket clientSocket = new Socket(serverIPAddress, port);
-        // clientSocket.getOutputStream() returns an output stream associated with the
-        // socket, and DataOutputStream is used to handle higher-level data types (like
-        // int, double, etc.).
         DataOutputStream DataToServer = new DataOutputStream(clientSocket.getOutputStream());
-        // This line sends data to the server.
         DataToServer.writeBytes(choice + '\n');
 
         BufferedReader serverResponse = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
