@@ -13,7 +13,7 @@ public class DisplayVideoSize {
    }
    public static void main(String[] args) 
      {
-      String file = "Server1.java";
+      String file = "video.mp4";
       long size = getFileSize(Paths.get(System.getProperty("user.dir"),file).toString());      
       System.out.println("Video size in Kilo Bytes: " + size/(1024) +"KB");
      }
