@@ -137,5 +137,7 @@ class Server:
     
 if __name__ == "__main__":
     host = "127.0.0.1"
-    ports = [8000,8300,8600]
+    with open("in.txt",'r') as f:
+        ports = f.read().split("\n")
+    ports = list(map(int,ports))
     server = Server(host, ports)
