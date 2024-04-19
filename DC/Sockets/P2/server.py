@@ -43,6 +43,7 @@ class Server:
                 self.reply(conn, response)
             except Exception as e:
                 print(e)
+                print("Closing connection with client")
                 conn.close()
                 break
 
