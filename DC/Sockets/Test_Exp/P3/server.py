@@ -1,6 +1,7 @@
 import socket
 import subprocess
 import threading
+from client import Client
 
 class Server:
     def __init__(self, host, port):
@@ -59,7 +60,11 @@ class Server:
 if __name__ == "__main__":
     hosts = ["127.0.0.1", "127.0.0.1", "127.0.0.1"]
     ports = [9000, 9500, 9800]
-    servers = []
+    servers = ["127.0.0.1","127.0.0.1"]
+    server_ports = [19500,19800]
+    for i in  range(3):
+        pass
+    
     for i in range(3):
         server = Server(hosts[i], ports[i])
         servers.append(server)
