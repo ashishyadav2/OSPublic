@@ -1,136 +1,71 @@
-import multiprocessing, traceback
+from threading import Thread, Lock
+import time
 
-w1_messagesToSend = [
-    (1023, 2, 1),
-    (1023, 3, 1),
-    (1234, 2, 1),
-    (1456, 3, 1),
-    (2367, 2, 1),
-]
-w2_messagesToSend = [
-    (2231, 1, 2),
-    (9237, 3, 2),
-    (1231, 1, 2),
-    (3490, 1, 2),
-]
-w3_messagesToSend = [
-    (3489, 1, 3),
-    (1934, 2, 3),
-    (2567, 2, 3),
-    (9823, 1, 3),
-]
+class LamportMutex:
+    def __init__(self, process_id, num_processes):
+        self.process_id = process_id
+        self.num_processes = num_processes
+        self.clock = 1
+        self.requesting_cs = False
+        self.reply_received = [False] * num_processes
+        self.cs_mutex = Lock()
+        self.request_mutex = Lock()
 
-w1_messagesToReply = {
-    1231:
-        (9823, 3, 1),
-}
+    def request_critical_section(self):
+        self.request_mutex.acquire()
+        self.clock += 1
+        self.requesting_cs = True
+        request_time = self.clock
+        self.request_mutex.release()
 
-w2_messagesToReply = {
-    1023:
-        (1212, 1, 2),
-    1234:
-        (1111, 1, 2),
-    1934:
-        (2233, 3, 2),
-}
+        for process in range(self.num_processes):
+            if process != self.process_id:
+                # Send request to all other processes
+                self.send_request(process, request_time)
 
-w3_messagesToReply = {
-    1023:
-        (1999, 1, 3),
-    9237:
-        (2341, 2, 3),
-}
+        # Wait until all replies are received
+        while not all(self.reply_received):
+            time.sleep(0.1)
 
-Q = multiprocessing.Queue()
+        self.enter_critical_section()
 
-def worker(Q: multiprocessing.Queue, PID: str, messages: list[tuple], replyTo: dict):
-    import threading, time
-    import random
-    
-    exitEvent = threading.Event()
-    lock = threading.Lock()
-    EVENTS = []
-    currentTimeStamp = 0
+    def enter_critical_section(self):
+        self.cs_mutex.acquire()
+        print(f"Process {self.process_id} enters the critical section.")
+        time.sleep(1)  # Simulating some work in the critical section
+        print(f"Process {self.process_id} exits the critical section.")
+        self.cs_mutex.release()
 
-    def peek(Q: multiprocessing.Queue, pos: int=0):
-        pos = pos if pos < Q.qsize() else -1
-        l = []
-        while(Q.qsize()):
-            l.append(Q.get())
-        ele = l[pos] if len(l) else None
-        try:
-            while(True):
-                Q.put(l.pop(0))
-        except IndexError:
-            pass
-        return ele
+        # Reset requesting flag and clear reply received array
+        self.requesting_cs = False
+        self.reply_received = [False] * self.num_processes
 
-    def sendMessage(Q: multiprocessing.Queue):
-        nonlocal EVENTS, currentTimeStamp
-        for i in messages:
-            lock.acquire()
-            currentTimeStamp += 1
-            event = (i, currentTimeStamp)
-            Q.put(event)
-            EVENTS.append(event)
-            print(f"[SENT] Process {PID}:", f"TimeStamp:{currentTimeStamp}", EVENTS[-1] if len(EVENTS) else None, sep="\t")
-            lock.release()
-            time.sleep(random.randint(1, 3))
-        time.sleep(10)
-        exitEvent.set()
+    def send_request(self, dest_process, request_time):
+        # Simulate sending a request to dest_process
+        time.sleep(0.1)
+        print(f"Process {self.process_id} sends request with timestamp {request_time} to Process {dest_process}.")
+        self.receive_request_reply(dest_process)
 
-    def receiveMessage(Q: multiprocessing.Queue, replyTo: dict):
-        nonlocal EVENTS, currentTimeStamp
-        while True:
-            try:
-                if(exitEvent.is_set()):
-                    break
-                if(Q.empty() is False):
-                    msg = peek(Q)
-                    if(msg and msg[0][1] == PID):
-                        msg = Q.get()
-                        lock.acquire()
-                        if(currentTimeStamp < msg[1]):
-                            currentTimeStamp = msg[1]
-                        currentTimeStamp += 1
-                        EVENTS.append((msg[0], currentTimeStamp))
-                        print(f"[RECV] Process {PID}:", f"TimeStamp:{currentTimeStamp}", EVENTS[-1] if len(EVENTS) else None, sep="\t")
-                        if(replyTo.get(msg[0][0])):
-                            currentTimeStamp += 1
-                            Q.put((replyTo[msg[0][0]], currentTimeStamp))
-                            EVENTS.append((replyTo[msg[0][0]], currentTimeStamp))
-                            print(f"[SENT] Process {PID}:", f"TimeStamp:{currentTimeStamp}", EVENTS[-1] if len(EVENTS) else None, sep="\t")
-                        lock.release()
-            except KeyboardInterrupt:
-                print("Terminating")
-                break
-            except Exception as err:
-                print(traceback.format_exc())
-                print(PID, EVENTS, msg)
-                print(err)
+    def receive_request_reply(self, sender_process):
+        self.reply_received[sender_process] = True
 
-    sender = threading.Thread(target=sendMessage, args=(Q, ))
-    receiver = threading.Thread(target=receiveMessage, args=(Q, replyTo))
+        # Simulate sending a reply back to the sender
+        time.sleep(0.1)
+        print(f"Process {self.process_id} sends reply to Process {sender_process}.")
 
-    sender.start()
-    receiver.start()
+    def simulate(self):
+        self.request_critical_section()
 
-    sender.join()
-    receiver.join()
 
-def createProcesses():
-    global Q
-    p1 = multiprocessing.Process(target=worker, args=(Q, 1, w1_messagesToSend, w1_messagesToReply))
-    p2 = multiprocessing.Process(target=worker, args=(Q, 2, w2_messagesToSend, w2_messagesToReply))
-    p3 = multiprocessing.Process(target=worker, args=(Q, 3, w3_messagesToSend, w3_messagesToReply))
+if __name__ == "__main__":
+    num_processes = 3
+    processes = []
 
-    p1.start()
-    p2.start()
-    p3.start()
+    for i in range(num_processes):
+        process = LamportMutex(i, num_processes)
+        processes.append(process)
+        thread = Thread(target=process.simulate)
+        thread.start()
 
-    p1.join()
-    p2.join()
-    p3.join()
-
-if __name__ == '__main__':
-    createProcesses()
+    for process in processes:
+        thread.join()

@@ -1,56 +1,44 @@
-class Process:
-    def __init__(self, pid):
-        self.pid = pid
+class BullyAlgorithm:
+    def __init__(self, processes):
+        self.processes = processes
         self.coordinator = None
-        self.processes = []
 
-    def send_election_message(self, dest_pid):
-        print(f"Process {self.pid} sends election message to Process {dest_pid}")
+    def election(self, process_id):
+        print(f"Process {process_id} initiates an election")
+        higher_processes = [p for p in self.processes if p > process_id]
+        if not higher_processes:
+            self.coordinator = process_id
+            print(f"Process {process_id} is elected as coordinator")
+            self.notify_coordinator()
+            return
 
-    def send_coordinate_message(self, dest_pid):
-        print(f"Process {self.pid} sends coordinate message to Process {dest_pid}")
+        highest_id = max(higher_processes)
+        print(f"Process {process_id} sends election message to higher processes: {higher_processes}")
 
-    def start_election(self):
-        print(f"Process {self.pid} starts election")
-        higher_pids = [p for p in self.processes if p.pid > self.pid]
-        if not higher_pids:
-            self.coordinator = self
-            for p in self.processes:
-                if p != self:
-                    p.send_coordinate_message(self.pid)
-            print(f"Process {self.pid} becomes the coordinator")
-        else:
-            highest_pid = max(higher_pids, key=lambda p: p.pid)
-            highest_pid.send_election_message(self.pid)
+        for higher_process in higher_processes:
+            # Simulate message passing, here it just prints the message
+            print(f"Process {process_id} sends election message to Process {higher_process}")
 
-    def receive_election_message(self, sender_pid):
-        print(f"Process {self.pid} receives election message from Process {sender_pid}")
-        self.start_election()
+            # Simulate receiving reply message, here it just prints the message
+            print(f"Process {higher_process} sends reply message to Process {process_id}")
 
-    def receive_coordinate_message(self, sender_pid):
-        print(f"Process {self.pid} receives coordinate message from Process {sender_pid}")
-        self.coordinator = self.processes[sender_pid - 1]
-        print(f"Process {self.pid} acknowledges Process {sender_pid} as coordinator")
+            if highest_id == higher_process:
+                self.coordinator = highest_id
+                print(f"Process {highest_id} is elected as coordinator")
+                self.notify_coordinator()
+                return
 
-# Create processes
-num_processes = 5
-processes = [Process(i + 1) for i in range(num_processes)]
+    def notify_coordinator(self):
+        print(f"Coordinator {self.coordinator} is notified about the election result")
+        for process_id in self.processes:
+            if process_id != self.coordinator:
+                # Simulate message passing, here it just prints the message
+                print(f"Process {self.coordinator} sends 'Co-ordinator' message to Process {process_id}")
 
-# Set up processes' references to each other
-for i, process in enumerate(processes):
-    process.processes = processes[:i] + processes[i + 1:]
 
-# Simulate a process initiating an election
-process_to_start_election = processes[0]
-process_to_start_election.start_election()
+if __name__ == "__main__":
+    processes = [1, 2, 3, 4, 5]  # Example processes, each process has a unique identifier
+    bully = BullyAlgorithm(processes)
 
-# Simulate other processes receiving the election message
-for process in processes[1:]:
-    process.receive_election_message(process_to_start_election.pid)
-
-# Simulate the coordinator sending the coordinate message to other processes
-coordinator = process_to_start_election.coordinator
-if coordinator != process_to_start_election:
-    for process in processes:
-        if process != coordinator and coordinator is not None:
-            process.receive_coordinate_message(coordinator.pid)
+    # Assume process 3 initiates an election
+    bully.election(4)
