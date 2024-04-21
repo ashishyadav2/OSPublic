@@ -2,17 +2,11 @@ import numpy as np
 import copy
 import argparse
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-                description="A program that is used to send requests"
-            )
-    parser.add_argument("--nodes",type=int, help="Number of nodes")
-    args = parser.parse_args()
-    nodes = args.nodes
-    
-    if not nodes:
-        parser.error("Please enter number of nodes")
-        
-    nodes_list = [f'Server_{chr(i+65)}' for i in range(nodes)]
+    file_path = 'start.txt'
+    with open(file_path,'r') as f:
+        nodes_list = f.read().split('\n')
+        nodes_list = [line for line in nodes_list if len(line)>1]
+    nodes = len(nodes_list)
     hmap = {node: list() for node in nodes_list}
     
     start_range = 5000
@@ -23,7 +17,8 @@ if __name__ == "__main__":
         hmap[key].extend(port_numbers)
         start_range = end_range+500
         end_range += 1500
-        
+    
+
     hmap_copy = copy.deepcopy(hmap)
     d =  {node: list() for node in nodes_list}
     seen = set()
@@ -39,20 +34,23 @@ if __name__ == "__main__":
                     d[key].append(choice)
             if len(d[key])==nodes-1:
                 break
-            
-    with open("all_ins.txt",'w') as f:
-        for key in hmap_copy:
-            data = f"{key}\n{hmap_copy[key]}\n\n"
-            f.write(data)
-            
-    with open("all_config.txt",'w') as f:
-        for key in d:
-            data = f"\n{key}"
-            for port in d[key]:
-                data = f"{data}\n{port}"
-            data = f"{data}\n"
-            f.write(data)
+    new_dict = {}
+    i=0    
+    to_write = ''
+    for key in d:
+        keys = list(d.keys())
+        keys.remove(key)
+        port_list = d[key]
+        in_ports = ''.join([f'{str(port)}\n' for port in hmap_copy[key]])
+        to_write += f'{key} (config.txt)\n'
+        for ind,port in enumerate(port_list):
+            to_write+=f'{keys[ind]}:{port}\n'
+
+        to_write+='\n'
+        to_write+=f'{key} (in.txt)\n'
+        to_write+=in_ports
+        i+=1
+        to_write+='\n\n'
     
-    
-        
-        
+    with open('init_file.txt','w') as f:
+        f.write(to_write)
