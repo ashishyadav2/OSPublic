@@ -16,10 +16,8 @@ class BullyAlgorithm:
         print(f"Process {process_id} sends election message to higher processes: {higher_processes}")
 
         for higher_process in higher_processes:
-            # Simulate message passing, here it just prints the message
             print(f"Process {process_id} sends election message to Process {higher_process}")
 
-            # Simulate receiving reply message, here it just prints the message
             print(f"Process {higher_process} sends reply message to Process {process_id}")
 
             if highest_id == higher_process:
@@ -29,16 +27,13 @@ class BullyAlgorithm:
                 return
 
     def notify_coordinator(self):
-        print(f"Coordinator {self.coordinator} is notified about the election result")
         for process_id in self.processes:
-            if process_id != self.coordinator:
-                # Simulate message passing, here it just prints the message
+            if process_id != self.coordinator and process_id>0:
                 print(f"Process {self.coordinator} sends 'Co-ordinator' message to Process {process_id}")
 
 
 if __name__ == "__main__":
-    processes = [1, 2, 3, 4, 5]  # Example processes, each process has a unique identifier
+    processes = [1, 2, 3, 4, 5] 
     bully = BullyAlgorithm(processes)
 
-    # Assume process 3 initiates an election
-    bully.election(4)
+    bully.election(3)
