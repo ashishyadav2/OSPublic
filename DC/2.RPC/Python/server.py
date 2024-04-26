@@ -37,7 +37,7 @@ class Server:
                 elif client_msg == 4:
                     response = self.exec_process("python get_free_space.py")
                 elif client_msg == 5:
-                    response = self.exec_process("cpuinfo")
+                    response = self.exec_process("systeminfo")
                 else:
                     response = "Invalid option"
                 self.reply(conn, response)
